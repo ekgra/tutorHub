@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# yarn
+yarn-error.log
+
+# npm
+*.npmrc
+*.lock
+
