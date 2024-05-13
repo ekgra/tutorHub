@@ -11,10 +11,12 @@ const logger = require('./utils/logger/logger');
 require('./utils/auth/authLocalJWT');
 const connectAuthDB = require('./utils/database/authDBConnection'); 
 
-const studentRoutes = require('./routes/studentRoutes');
-const courseRoutes = require('./routes/courseRoutes'); 
 // const authLocalRoutes = require('./routes/authLocalRoutes');
 const authLocalJWTRoutes = require('./routes/authLocalJWTRoutes');
+const studentRoutes = require('./routes/studentRoutes');
+const tutorRoutes = require('./routes/tutorRoutes');
+const courseRoutes = require('./routes/courseRoutes'); 
+
 const { error } = require('winston');
 
 require('dotenv').config()
@@ -53,11 +55,12 @@ app.use('/auth', authLocalJWTRoutes);
 app.use('/api',  passport.authenticate('jwt', { session: false }), studentRoutes);
 // app.use('/api', offeringRoutes); 
 app.use('/api',  passport.authenticate('jwt', { session: false }), courseRoutes);
+app.use('/api',  passport.authenticate('jwt', { session: false }), tutorRoutes);
 
 app.all('*', (req, res, next) => {
   // res.status(404);
   // logger.error(error);
-  // logger.error(res.statusCode, new Error(`\n${req.originalUrl} - URL not Found`));
+  logger.error(res.statusCode, new Error(`\n${req.originalUrl} - URL not Found`));
   next();
 });
 
