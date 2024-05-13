@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const passport = require('passport');
 // const { passport } = require('./utils/auth/authLocal');
 // const session = require('express-session');
@@ -22,6 +23,26 @@ const { error } = require('winston');
 require('dotenv').config()
 
 // == Initialize MiddleWare
+// -- Allow Cross Origin Requests
+// app.use(cors());  --- Blatantly allowing all cross origin requests
+
+// Specify allowed origins
+const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:3001'];
+
+// CORS middleware with origin restriction
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+
 // -- HTTP Body Parser Middleware
 app.use(bodyParser.json());
 
