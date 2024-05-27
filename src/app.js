@@ -13,7 +13,8 @@ require('./utils/auth/authLocalJWT');
 const connectAuthDB = require('./utils/database/authDBConnection'); 
 
 // const authLocalRoutes = require('./routes/authLocalRoutes');
-const authLocalJWTRoutes = require('./routes/authLocalJWTRoutes');
+// const authLocalJWTRoutes = require('./routes/authLocalJWTRoutes');
+const authAppJWTRoutes = require('./routes/authAppJWTRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');
 const courseRoutes = require('./routes/courseRoutes'); 
@@ -71,7 +72,8 @@ app.use((req, res, next) => {
 
 // == Routes
 // app.use('/', authLocalRoutes);
-app.use('/auth', authLocalJWTRoutes);
+// app.use('/auth', authLocalJWTRoutes);
+app.use('/auth', authAppJWTRoutes);
 // app.use('/api', studentRegistrationRoutes);
 app.use('/api',  passport.authenticate('jwt', { session: false }), studentRoutes);
 // app.use('/api', offeringRoutes); 
