@@ -3,7 +3,10 @@ const router = express.Router();
 const studentRegistrationController = require("../controller/studentController");
 
 
-// Create a new student
+// Check if student profile exists 
+router.get('/students/exists/:id', studentRegistrationController.doesStudentExist);
+
+// Create a new student 
 router.post('/students', studentRegistrationController.registerStudent);
 
 // Get all students

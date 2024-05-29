@@ -5,14 +5,36 @@ const {ObjectId} = require('mongodb');
 // Collection name
 const collectionName = 'students';
 
+exports.doesStudentExist = async (req, res) => {
+  try {
+    const { id } = req.params; // Assume email is passed as a URL parameter
+    const db = await dbConn;
+    const collection = db.collection(collectionName);
+
+    const student = await collection.findOne({ _id: email });
+
+    if (student) {
+      return res.status(200).json({ exists: true });
+    } else {
+      return res.status(404).json({ exists: false });
+    }
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+
 exports.registerStudent = async (req, res) => {
     try {
       console.log(req.user);
+      console.log(req.body);
       if (req.user.userType !== 'student') {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
 
-      if (req.user._id !== req.body._id) {
+      if (req.user.email !== req.body.email) {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
 
@@ -21,7 +43,10 @@ exports.registerStudent = async (req, res) => {
       // Access the collection
       const collection = db.collection(collectionName);
       
-      const result = await collection.insertOne(req.body);
+      let {email, ...userData} = req.body;
+      userData._id = req.body.email;
+      userData.userType = req.user.userType;
+      const result = await collection.insertOne(userData);
       
       res.status(201).send(result); 
       logger.info(res.statusCode);

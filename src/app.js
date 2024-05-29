@@ -14,10 +14,11 @@ const connectAuthDB = require('./utils/database/authDBConnection');
 
 // const authLocalRoutes = require('./routes/authLocalRoutes');
 // const authLocalJWTRoutes = require('./routes/authLocalJWTRoutes');
-const authAppJWTRoutes = require('./routes/authAppJWTRoutes');
+const authAppRoutes = require('./routes/authAppRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');
 const courseRoutes = require('./routes/courseRoutes'); 
+const authenticateToken = require('./middleware/authValidate');
 
 const { error } = require('winston');
 
@@ -28,7 +29,7 @@ require('dotenv').config()
 // app.use(cors());  --- Blatantly allowing all cross origin requests
 
 // Specify allowed origins
-const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:3001'];
+const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:5173'];
 
 // CORS middleware with origin restriction
 app.use(cors({
@@ -73,17 +74,18 @@ app.use((req, res, next) => {
 // == Routes
 // app.use('/', authLocalRoutes);
 // app.use('/auth', authLocalJWTRoutes);
-app.use('/auth', authAppJWTRoutes);
-// app.use('/api', studentRegistrationRoutes);
-app.use('/api',  passport.authenticate('jwt', { session: false }), studentRoutes);
-// app.use('/api', offeringRoutes); 
-app.use('/api',  passport.authenticate('jwt', { session: false }), courseRoutes);
-app.use('/api',  passport.authenticate('jwt', { session: false }), tutorRoutes);
+app.use('/api', authAppRoutes);
+app.use('/api', authenticateToken, studentRoutes);
+// app.use('/api',  passport.authenticate('jwt', { session: false }), studentRoutes);
+// // app.use('/api', offeringRoutes); 
+// app.use('/api',  passport.authenticate('jwt', { session: false }), courseRoutes);
+// app.use('/api',  passport.authenticate('jwt', { session: false }), tutorRoutes);
 
-app.all('*', (req, res, next) => {
-  // res.status(404);
+app.all('*', (err, req, res, next) => {
+  res.status(400);
   // logger.error(error);
-  logger.error(res.statusCode, new Error(`\n${req.originalUrl} - URL not Found`));
+  logger.error('Error from upstream', err);
+  logger.error(res.statusCode, new Error(`\n${req.originalUrl} - URL not Found. \nAre you using the correct HTTP method?`));
   next();
 });
 

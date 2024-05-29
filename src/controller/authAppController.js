@@ -1,73 +1,35 @@
 const logger = require('../utils/logger/logger');
-const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const admin = require('../config/firebase-admin-config');
+const User = require('../model/userAuthAppModel');
 
 require('dotenv').config()
 
+console.log('authAppController');
 
-exports.signup = async(req, res, next) => {
-    passport.authenticate(
-        'signup',
-        async (err, user, info) => {
-            try {
-                if (err || !user) {
-                    res.status(409);
-                    res.json({ 
-                        message: info.message
-                    });
-                    const error = new Error(info.message);
-                    return next(error);
-                }
+exports.auth = async (req, res) => {
+    const googleToken = req.headers.authorization;
 
-                res.json({
-                    message: 'Signup successful',
-                    user: req.user
-                });
-                logger.info(res.statusCode);
-            } catch (error) {
-                logger.error(error)
-                return next(error);
-            }
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(googleToken);
+        const { email, name } = decodedToken;
+    
+        let user = await User.findOne({email});
+    
+        if (!user) {
+          user = new User({ email, name, userType: 'student' }); // Default to 'student', adjust as needed
+          await user.save();
         }
-    )(req, res, next);
-}
-
-const {JWT_SECRET_KEY} = process.env;
-exports.login = async(req, res, next) => {
-    passport.authenticate(
-        'login',
-        async (err, user, info) => {
-            try {
-                if (err || !user) {
-                    res.status(404);
-                    res.json({ 
-                        message: info.message
-                    });
-                    const error = new Error(info.message);
-                    return next(error);
-                }
-
-                req.login(
-                    user, 
-                    {session: false},
-                    async (error) => {
-                        if (error) {
-                            res.status(401); // TBD: [401 || 500] - unsure if this is server or client error
-                            logger.error(res.statusCode, error);
-                            return next(error);
-                        }
-
-                        const body = { _id: user.email, userType: user.userType};
-                        const token = jwt.sign({ user: body }, JWT_SECRET_KEY);
-
-                        res.status(200);
-                        logger.info(res.statusCode);
-                        return res.json({ token });
-                    }
-                );
-            } catch (error) {
-                return next(error);
-            }
-        }
-    )(req, res, next);
+    
+        const jwtToken = jwt.sign(
+          { email: user.email, name: user.name, userType: user.userType },
+          process.env.JWT_SECRET_KEY, // Ensure you have this in your environment variables
+          { expiresIn: '4d' }
+        );
+    
+        res.json({ jwtToken });
+      } catch (error) {
+        console.error('Error validating Firebase token:', error);
+        res.status(401).json({ error: 'Unauthorized' });
+      }
 }
