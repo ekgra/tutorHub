@@ -1,40 +1,19 @@
 const logger = require('../utils/logger/logger');
 const dbConn = require('../utils/database/appDBConnection'); 
-const {ObjectId} = require('mongodb');
 
 // Collection name
-const collectionName = 'students';
-
-exports.doesStudentExist = async (req, res) => {
-  try {
-    const { id } = req.params; // Assume email is passed as a URL parameter
-    const db = await dbConn;
-    const collection = db.collection(collectionName);
-
-    const student = await collection.findOne({ _id: email });
-
-    if (student) {
-      return res.status(200).json({ exists: true });
-    } else {
-      return res.status(404).json({ exists: false });
-    }
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-
+const collectionName = 'users';
 
 exports.registerStudent = async (req, res) => {
     try {
-      console.log(req.user);
-      console.log(req.body);
-      if (req.user.userType !== 'student') {
+
+      console.log("rbac", req.userRbac);
+      console.log("body", req.body);
+      if (req.userRbac.userType !== 'student') {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
 
-      if (req.user.email !== req.body.email) {
+      if (req.userRbac.email !== req.body.email) {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
 
@@ -44,9 +23,9 @@ exports.registerStudent = async (req, res) => {
       const collection = db.collection(collectionName);
       
       let {email, ...userData} = req.body;
-      userData._id = req.body.email;
-      userData.userType = req.user.userType;
-      const result = await collection.insertOne(userData);
+      userData.userType = req.userRbac.userType;
+      console.log(email, userData)
+      const result = await collection.updateOne({_id: email}, {$set: {userData}});
       
       res.status(201).send(result); 
       logger.info(res.statusCode);

@@ -2,13 +2,15 @@ const logger = require('../utils/logger/logger');
 const jwt = require('jsonwebtoken');
 const admin = require('../config/firebase-admin-config');
 const User = require('../model/userAuthAppModel');
+const dbConn = require('../utils/database/appDBConnection'); 
 
 require('dotenv').config()
 
-console.log('authAppController');
-
 exports.auth = async (req, res) => {
     const googleToken = req.headers.authorization;
+    const userType = req.body.userType;
+    const db = await dbConn;
+    const collection = db.collection('users');
 
     try {
         const decodedToken = await admin.auth().verifyIdToken(googleToken);
@@ -17,7 +19,8 @@ exports.auth = async (req, res) => {
         let user = await User.findOne({email});
     
         if (!user) {
-          user = new User({ email, name, userType: 'student' }); // Default to 'student', adjust as needed
+          user = new User({ email, name, userType }); 
+          await collection.insertOne({_id: email, name: name, userType: userType});
           await user.save();
         }
     

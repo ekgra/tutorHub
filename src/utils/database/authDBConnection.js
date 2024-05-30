@@ -1,7 +1,6 @@
 const logger = require('../logger/logger');
 const mongoose = require('mongoose');
 require('dotenv').config();
-require('../auth/authLocalJWT');
 
 // MongoDB connection URL
 const {MONGO_USERNAME, MONGO_PASSWORD, MONGO_URL, MONGO_CONN_OPTIONS, MONGO_AUTH_DBNAME} = process.env

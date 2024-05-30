@@ -9,11 +9,8 @@ const passport = require('passport');
 
 const logger = require('./utils/logger/logger');
 
-require('./utils/auth/authLocalJWT');
 const connectAuthDB = require('./utils/database/authDBConnection'); 
 
-// const authLocalRoutes = require('./routes/authLocalRoutes');
-// const authLocalJWTRoutes = require('./routes/authLocalJWTRoutes');
 const authAppRoutes = require('./routes/authAppRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');

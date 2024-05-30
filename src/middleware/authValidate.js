@@ -4,17 +4,19 @@ require('dotenv').config();
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // console.log("middleware - body", req.body, "user", req.user)
+  // console.log("authHeader", req)
+  // console.log(req);
 
   if (authHeader) {
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, userRbac) => {
       if (err) {
         return res.sendStatus(403);
       }
 
-      req.user = user;
+      console.log("validate", userRbac)
+      req.userRbac = userRbac;
       next();
     });
   } else {

@@ -4,7 +4,7 @@ const studentRegistrationController = require("../controller/studentController")
 
 
 // Check if student profile exists 
-router.get('/students/exists/:id', studentRegistrationController.doesStudentExist);
+// router.get('/students/exists/:email', studentRegistrationController.doesStudentExist);
 
 // Create a new student 
 router.post('/students', studentRegistrationController.registerStudent);
