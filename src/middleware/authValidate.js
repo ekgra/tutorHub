@@ -15,7 +15,6 @@ const authenticateToken = (req, res, next) => {
         return res.sendStatus(403);
       }
 
-      console.log("validate", userRbac)
       req.userRbac = userRbac;
       next();
     });

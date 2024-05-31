@@ -6,9 +6,6 @@ const collectionName = 'users';
 
 exports.registerStudent = async (req, res) => {
     try {
-
-      console.log("rbac", req.userRbac);
-      console.log("body", req.body);
       if (req.userRbac.userType !== 'student') {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
@@ -24,8 +21,7 @@ exports.registerStudent = async (req, res) => {
       
       let {email, ...userData} = req.body;
       userData.userType = req.userRbac.userType;
-      console.log(email, userData)
-      const result = await collection.updateOne({_id: email}, {$set: {userData}});
+      const result = await collection.updateOne({_id: email}, {$set: {...userData}});
       
       res.status(201).send(result); 
       logger.info(res.statusCode);
@@ -64,16 +60,19 @@ exports.getStudentById = async (req, res) => {
       // Access the collection
       const collection = db.collection(collectionName);
       
-      const student = await collection.findOne({ _id: req.params.id });
+      const student = await collection.findOne({ _id: req.params.email });
 
       // Check user access permissions
-      if (req.user.userType === 'student' && student._id !== req.user._id) {
+      if (req.userRbac.userType === 'student' && student._id !== req.userRbac.email) {
         return res.status(403).json({ message: 'Unauthorized' });
       }  
       
       if (!student) {
         return res.status(404).send();
       }
+
+      student['email'] = student._id;
+      delete student._id;
       res.send(student);
       logger.info(res.statusCode);
     } catch (error) {
